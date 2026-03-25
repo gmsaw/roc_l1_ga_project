@@ -6,13 +6,6 @@ This project implements an **L1 Adaptive Control System**, mathematically valida
 
 ---
 
-## 🌐 Language
-
-- 🇬🇧 English (default)
-- 🇮🇩 [Bahasa Indonesia](README.id.md)
-
----
-
 ## 🎯 Problem Formulation
 
 This project addresses the following research questions:
