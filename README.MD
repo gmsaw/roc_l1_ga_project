@@ -1,48 +1,49 @@
-# 🚀 Rancang Bangun Sistem Kendali Adaptif L1 pada ROV  
-## Berbasis Optimasi Algoritma Genetika & Analisis Kestabilan Lyapunov
+# 🚀 Design of L1 Adaptive Control System for Remotely Operated Vehicle (ROV)  
+## Based on Genetic Algorithm Optimization and Lyapunov Stability Analysis
 
-Kerangka simulasi komprehensif berbasis Python untuk *Remotely Operated Vehicle* (ROV) yang mengimplementasikan:
-
-- **Sistem Kendali Adaptif L1**
-- **Optimasi Algoritma Genetika (GA)**
-- **Analisis Kestabilan Lyapunov**
+A comprehensive Python-based simulation framework for underwater **Remotely Operated Vehicles (ROV)**.  
+This project implements an **L1 Adaptive Control System**, mathematically validated using **Lyapunov Stability Analysis** and optimized via a **Genetic Algorithm (GA)**.
 
 ---
 
-## 🎯 Rumusan Masalah
+## 🌐 Language
 
-Penelitian ini berfokus pada:
+- 🇬🇧 English (default)
+- 🇮🇩 [Bahasa Indonesia](README.id.md)
 
-1. **Kinerja kendali Adaptif L1**  
-   Bagaimana sistem mempertahankan *trajectory tracking* di bawah ketidakpastian dan gangguan arus laut?
+---
 
-2. **Optimasi parameter menggunakan GA**  
-   Bagaimana GA melakukan *auto-tuning* parameter:
-   - $\omega_c$ (bandwidth filter)  
+## 🎯 Problem Formulation
+
+This project addresses the following research questions:
+
+1. **How does the L1 Adaptive Control system perform** in maintaining trajectory tracking of an ROV under dynamic uncertainties and ocean disturbances?
+
+2. **How can a Genetic Algorithm (GA) be applied** to optimize and auto-tune L1 adaptive control parameters such as:
+   - $\omega_c$ (filter bandwidth)  
    - $\gamma$ (adaptation gain)  
    - $k$ (feedback gain)  
 
-   untuk meminimalkan error (ITAE / ISE)?
+   in order to minimize performance indices (ITAE / ISE)?
 
-3. **Validasi kestabilan Lyapunov**  
-   Apakah sistem stabil secara asimtotik berdasarkan fungsi energi Lyapunov?
-
----
-
-## 🌟 Fitur Utama
-
-| Fitur | Deskripsi |
-|------|----------|
-| **Dinamika ROV 6-DOF** | Model berbasis persamaan Fossen (massa, Coriolis, drag) |
-| **L1 Adaptive Control** | Robust terhadap gangguan dan dinamika tak termodel |
-| **Genetic Algorithm (GA)** | Auto-tuning parameter kontrol |
-| **Analisis Lyapunov** | Validasi kestabilan real-time |
-| **GUI PyQt5** | Visualisasi interaktif |
-| **Export JSON** | Simpan data simulasi |
+3. **How can asymptotic stability be proven** using Lyapunov-based energy functions through computational evaluation?
 
 ---
 
-## 📁 Struktur Proyek
+## 🌟 Key Features
+
+| Feature | Description |
+|--------|------------|
+| **6-DOF ROV Dynamics** | Realistic physical modeling based on Fossen equations (mass, Coriolis, drag) |
+| **L1 Adaptive Controller** | Robust control against uncertainties and disturbances |
+| **Genetic Algorithm Optimization** | Automatic parameter tuning using DEAP |
+| **Lyapunov Stability Analysis** | Real-time energy-based stability validation |
+| **Interactive GUI (PyQt5)** | Live visualization and control interface |
+| **JSON Export** | Export simulation data for further analysis |
+
+---
+
+## 📁 Project Structure
 
 ```
 roc_l1_ga_project/
@@ -70,16 +71,16 @@ roc_l1_ga_project/
 
 ---
 
-## ⚙️ Instalasi
+## ⚙️ Installation
 
-### 1. Clone repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/gmsaw/roc_l1_ga_project.git
 cd roc_l1_ga_project
 ```
 
-### 2. Virtual Environment
+### 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
@@ -99,7 +100,9 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 Cara Menjalankan
+## 🚀 Usage
+
+Run the simulation and launch the GUI:
 
 ```bash
 python main.py
@@ -107,37 +110,37 @@ python main.py
 
 ---
 
-## 🖥️ Panduan GUI
+## 🖥️ GUI Guide
 
-| Komponen | Fungsi |
+| Component | Function |
 |----------|--------|
-| Start / Pause / Stop | Kontrol simulasi |
-| Parameter Tuning | Manual atau via GA |
-| Trajectory | Step, Smooth, Sine |
-| Environment | Simulasi arus laut |
-| Lyapunov Tab | Analisis kestabilan |
-| Export JSON | Simpan data |
+| Simulation Control | Start / Pause / Stop simulation |
+| Parameter Tuning | Manual tuning or GA optimization |
+| Trajectory | Step, Smooth Step, Sine Wave |
+| Environment | Simulate ocean disturbances |
+| Lyapunov Tab | Stability analysis visualization |
+| Export JSON | Save simulation data |
 
 ---
 
-## 🧮 Landasan Matematis
+## 🧮 Mathematical Foundation
 
-### 1. Fungsi Lyapunov
+### 1. Lyapunov Stability Function
 
-Fungsi energi sistem:
+The system energy function is defined as:
 
 $$
 V(t) = \frac{1}{2} e(t)^T K_p e(t) + \frac{1}{2} v(t)^T M v(t)
 $$
 
-Dimana:
+Where:
 
-- $e(t)$ = error posisi  
-- $v(t)$ = kecepatan  
-- $K_p$ = gain kontrol  
-- $M$ = matriks massa  
+- **e(t)** = tracking error  
+- **v(t)** = velocity  
+- **K_p** = control gain  
+- **M** = mass matrix  
 
-Kondisi kestabilan:
+The system is asymptotically stable if:
 
 $$
 \frac{dV(t)}{dt} \leq 0
@@ -145,31 +148,41 @@ $$
 
 ---
 
-### 2. Hukum Adaptasi (L1 Adaptive Law)
+### 2. Adaptation Law (L1 Adaptive Control)
 
 $$
 \frac{d\sigma}{dt} = \Gamma \cdot \text{Proj}(\sigma, -\tilde{x})
 $$
 
-Dimana:
+Where:
 
-- $\Gamma$ = adaptation gain  
-- $\tilde{x}$ = estimation error  
-- $\text{Proj}$ = operator pembatas  
-
----
-
-## 📊 Metrik Evaluasi
-
-| Metrik | Formula | Deskripsi |
-|--------|--------|----------|
-| ITAE | $ \int_0^T t |e(t)| dt $ | Penalti error lama |
-| ISE | $ \int_0^T |e(t)|^2 dt $ | Penalti error besar |
-| IAE | $ \int_0^T |e(t)| dt $ | Total error |
+- **$\Gamma$** = adaptation gain  
+- **$\tilde{x}$** = state estimation error  
+- **Proj** = projection operator  
 
 ---
 
-## 👤 Penulis
+## 📊 Performance Metrics
+
+| Metric | Formula | Description |
+|--------|--------|------------|
+| ITAE | $ \int_0^T t |e(t)| dt $ | Penalizes long-duration error |
+| ISE | $ \int_0^T |e(t)|^2 dt $ | Penalizes large errors |
+| IAE | $ \int_0^T |e(t)| dt $ | Total accumulated error |
+
+---
+
+## 📄 Publication (In Progress)
+
+This project is being developed into an IEEE-style research paper covering:
+
+- L1 Adaptive Control Design  
+- Genetic Algorithm Optimization  
+- Lyapunov Stability Analysis  
+
+---
+
+## 👤 Author
 
 **Gede Mahendra Sastra Adhi Wiguna**  
-Program Studi Fisika, Universitas Udayana  
+Physics Department, Universitas Udayana  
