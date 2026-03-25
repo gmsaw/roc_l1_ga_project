@@ -5,7 +5,7 @@ from scipy.integrate import trapezoid
 import time
 
 def run_console():
-    """Run console version"""
+    """Run console version with Lyapunov Stability Analysis"""
     from plant.rov_dynamics import ROVDynamics
     from plant.environment import OceanCurrent
     from controller.l1_adaptive import L1AdaptiveControllerStable as L1AdaptiveController
@@ -33,6 +33,15 @@ def run_console():
             controls = []
             errors = []
             
+            # --- TAMBAHAN UNTUK LYAPUNOV ---
+            lyapunov_V = []
+            lyapunov_V_dot = []
+            
+            # Matriks Massa (M) perkiraan dari rov_dynamics.py untuk perhitungan energi
+            M_diag = np.array([120.0, 120.0, 130.0, 15.0, 15.0, 23.0])
+            Kp = 10.0 # Gain Kp dari L1AdaptiveControllerStable
+            # -------------------------------
+            
             ref_traj = self.reference_trajectory(self.t)
             
             for i, t_step in enumerate(self.t):
@@ -49,13 +58,28 @@ def run_console():
                 states.append(state.copy())
                 controls.append(control.copy())
                 self.adapt_params.append(adapt_state)
-                errors.append(ref - pos)
+                
+                error = ref - pos
+                errors.append(error)
+                
+                # --- PERHITUNGAN LYAPUNOV V(t) & dV/dt ---
+                # V = 0.5 * e^T * Kp * e + 0.5 * v^T * M * v
+                V = 0.5 * np.sum(Kp * (error**2)) + 0.5 * np.sum(M_diag * (vel**2))
+                lyapunov_V.append(V)
+                
+                # Turunan Numerik dV/dt
+                if i > 0:
+                    V_dot = (V - lyapunov_V[-2]) / self.dt
+                else:
+                    V_dot = 0.0
+                lyapunov_V_dot.append(V_dot)
+                # -----------------------------------------
                 
             self.adapt_params = np.array(self.adapt_params)
-            return np.array(states), np.array(controls), np.array(errors)
+            return np.array(states), np.array(controls), np.array(errors), np.array(lyapunov_V), np.array(lyapunov_V_dot)
 
         def get_performance_metrics(self):
-            states, controls, errors = self.run()
+            states, controls, errors, _, _ = self.run()
             pos_error = errors[:, :6]
             
             # Simple settling time calculation
@@ -80,10 +104,11 @@ def run_console():
 
     # Run simulation
     sim = ROVSimulation()
-    states, controls, errors = sim.run()
+    states, controls, errors, lyapunov_V, lyapunov_V_dot = sim.run()
     
     ref_traj = sim.reference_trajectory(sim.t)
     
+    # --- PLOT 1: KINERJA KONTROL ---
     fig, axes = plt.subplots(2, 2, figsize=(14, 10))
     
     # Position tracking
@@ -124,6 +149,29 @@ def run_console():
     axes[1, 1].grid(True, alpha=0.3)
     
     plt.tight_layout()
+    
+    # --- PLOT 2: KESTABILAN LYAPUNOV ---
+    fig2, ax2 = plt.subplots(2, 1, figsize=(10, 8))
+    
+    # Plot V(t)
+    ax2[0].plot(sim.t, lyapunov_V, 'b-', linewidth=2)
+    ax2[0].set_title('Lyapunov Function $V(t)$ (Total Error Energy)')
+    ax2[0].set_ylabel('$V(t)$')
+    ax2[0].grid(True, alpha=0.3)
+    ax2[0].axhline(y=0, color='k', linestyle='--', alpha=0.8)
+    
+    # Plot dV/dt
+    ax2[1].plot(sim.t, lyapunov_V_dot, 'r-', linewidth=1.5)
+    ax2[1].axhline(y=0, color='k', linestyle='--', alpha=0.8)
+    ax2[1].fill_between(sim.t, lyapunov_V_dot, 0, where=(lyapunov_V_dot <= 0), color='green', alpha=0.2, label='Stable Region ($\dot{V} \le 0$)')
+    ax2[1].fill_between(sim.t, lyapunov_V_dot, 0, where=(lyapunov_V_dot > 0), color='red', alpha=0.2, label='Transient/Injection')
+    ax2[1].set_title('Derivative of Lyapunov Function $\dot{V}(t)$')
+    ax2[1].set_xlabel('Time (s)')
+    ax2[1].set_ylabel('$\dot{V}(t)$')
+    ax2[1].legend()
+    ax2[1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
     plt.show()
     
     # Print metrics
@@ -139,29 +187,25 @@ def run_console():
     print(f"  Steady-state Error: {metrics['steady_state_error']:.3f} m")
     print(f"  Overshoot: {metrics['overshoot']:.1f}%")
 
+
 def main():
     """Main execution function"""
     print("\n" + "="*60)
     print("ROV L1 Adaptive Control System with GA Auto-Tuning")
     print("="*60)
+    print("Memulai antarmuka grafis (GUI)...")
     
-    print("\nSelect mode:")
-    print("1. Run GUI")
-    print("2. Run Console Simulation")
-    
-    choice = input("\nEnter choice (1/2): ").strip()
-    
-    if choice == '1':
-        try:
-            from gui.main_window import run_gui
-            run_gui()
-        except ImportError as e:
-            print(f"Error importing GUI modules: {e}")
-            print("Please install PyQt5: pip install PyQt5 pyqtgraph")
-    elif choice == '2':
+    try:
+        # Langsung mengimpor dan memanggil GUI tanpa meminta input konsol
+        from gui.main_window import run_gui
+        run_gui()
+    except ImportError as e:
+        # Fallback ke console (dengan grafik plot) jika PyQt5 gagal diimpor
+        print(f"\n[ERROR] Gagal memuat modul GUI: {e}")
+        print("Pastikan PyQt5 sudah terinstall dengan: pip install PyQt5 pyqtgraph")
+        print("Sistem secara otomatis dialihkan ke Simulasi Konsol...")
         run_console()
-    else:
-        print("Invalid choice. Exiting.")
+
 
 if __name__ == "__main__":
     main()
