@@ -132,10 +132,10 @@ $$
 
 Dimana:
 
-- e(t) = error posisi  
-- v(t) = kecepatan  
-- K_p = gain kontrol  
-- M = matriks massa  
+- $e(t)$ = error posisi  
+- $v(t)$ = kecepatan  
+- $K_p$ = gain kontrol  
+- $M$ = matriks massa  
 
 Kondisi kestabilan:
 
@@ -151,11 +151,25 @@ $$
 \frac{d\sigma}{dt} = \Gamma \cdot \text{Proj}(\sigma, -\tilde{x})
 $$
 
+Dimana:
+
+- $\Gamma$ = adaptation gain  
+- $\tilde{x}$ = estimation error  
+- $\text{Proj}$ = operator pembatas  
+
+---
+
+## 📊 Metrik Evaluasi
+
+| Metrik | Formula | Deskripsi |
+|--------|--------|----------|
+| ITAE | $ \int_0^T t |e(t)| dt $ | Penalti error lama |
+| ISE | $ \int_0^T |e(t)|^2 dt $ | Penalti error besar |
+| IAE | $ \int_0^T |e(t)| dt $ | Total error |
+
 ---
 
 ## 👤 Penulis
 
 **Gede Mahendra Sastra Adhi Wiguna**  
 Program Studi Fisika, Universitas Udayana  
-
----
